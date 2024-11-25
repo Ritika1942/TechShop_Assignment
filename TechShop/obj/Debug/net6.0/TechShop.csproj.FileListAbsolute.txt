@@ -1,0 +1,15 @@
+C:\Users\Ritika\Desktop\foundation\DotNet\TechShop\bin\Debug\net6.0\TechShop.exe
+C:\Users\Ritika\Desktop\foundation\DotNet\TechShop\bin\Debug\net6.0\TechShop.deps.json
+C:\Users\Ritika\Desktop\foundation\DotNet\TechShop\bin\Debug\net6.0\TechShop.runtimeconfig.json
+C:\Users\Ritika\Desktop\foundation\DotNet\TechShop\bin\Debug\net6.0\TechShop.dll
+C:\Users\Ritika\Desktop\foundation\DotNet\TechShop\bin\Debug\net6.0\TechShop.pdb
+C:\Users\Ritika\Desktop\foundation\DotNet\TechShop\obj\Debug\net6.0\TechShop.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Ritika\Desktop\foundation\DotNet\TechShop\obj\Debug\net6.0\TechShop.AssemblyInfoInputs.cache
+C:\Users\Ritika\Desktop\foundation\DotNet\TechShop\obj\Debug\net6.0\TechShop.AssemblyInfo.cs
+C:\Users\Ritika\Desktop\foundation\DotNet\TechShop\obj\Debug\net6.0\TechShop.csproj.CoreCompileInputs.cache
+C:\Users\Ritika\Desktop\foundation\DotNet\TechShop\obj\Debug\net6.0\TechShop.dll
+C:\Users\Ritika\Desktop\foundation\DotNet\TechShop\obj\Debug\net6.0\refint\TechShop.dll
+C:\Users\Ritika\Desktop\foundation\DotNet\TechShop\obj\Debug\net6.0\TechShop.pdb
+C:\Users\Ritika\Desktop\foundation\DotNet\TechShop\obj\Debug\net6.0\TechShop.genruntimeconfig.cache
+C:\Users\Ritika\Desktop\foundation\DotNet\TechShop\obj\Debug\net6.0\ref\TechShop.dll
+C:\Users\Ritika\Desktop\foundation\DotNet\TechShop\obj\Debug\net6.0\TechShop.csproj.AssemblyReference.cache
