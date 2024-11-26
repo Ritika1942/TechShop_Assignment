@@ -1,282 +1,375 @@
-﻿using System;
+﻿
+using TechShop.Model;
+using TechShop.Repository;
+using TechShop.Service;
+using System;
 using System.Collections.Generic;
-using TechShop.Service; 
-using TechShop.Models; 
-using TechShop.Repository; 
 
-namespace TechShop.Main
+ITechRepository techShopRepository = new TechShopRepository();
+ITechService techShopService = new TechShopService(techShopRepository);
+
+bool continueRunning = true;
+
+while (continueRunning)
 {
-    class Program
+    try
     {
-        static void Main(string[] args)
+        Console.WriteLine("\n---- TechShop Management ----");
+        Console.WriteLine("1. Add New Customer");
+        Console.WriteLine("2. Update Customer");
+        Console.WriteLine("3. Remove Customer");
+        Console.WriteLine("4. View Customer By ID");
+        Console.WriteLine("5. Search Customers");
+        Console.WriteLine("6. Add New Product");
+        Console.WriteLine("7. Update Product");
+        Console.WriteLine("8. Remove Product");
+        Console.WriteLine("9. View Product By ID");
+        Console.WriteLine("10. Search Products");
+        Console.WriteLine("11. Create Order");
+        Console.WriteLine("12. Update Order");
+        Console.WriteLine("13. Remove Order");
+        Console.WriteLine("14. View Order By ID");
+        Console.WriteLine("15. List All Inventory");
+        Console.WriteLine("16. Exit");
+        Console.Write("Choose an option: ");
+
+        string choice = Console.ReadLine();
+
+        switch (choice)
         {
-            
-            try
-            {
-                var productService = new ProductService();
-                var orderService = new OrderService();
-                var productCatalog = productService.GetAllProducts();
-                Dictionary<int, OrderDetail> orderDetails = new Dictionary<int, OrderDetail>();
+            case "1":
+                Console.WriteLine("Enter Customer Details:");
+                Customer newCustomer = new Customer();
 
-                Console.WriteLine("Welcome to TechShop!");
-                bool isRunning = true;
+                Console.Write("First Name: ");
+                newCustomer.FirstName = Console.ReadLine();
 
-                while (isRunning)
+                Console.Write("Last Name: ");
+                newCustomer.LastName = Console.ReadLine();
+
+                Console.Write("Email: ");
+                newCustomer.Email = Console.ReadLine();
+
+                Console.Write("Phone: ");
+                newCustomer.Phone = Console.ReadLine();
+
+                Console.Write("Address: ");
+                newCustomer.Address = Console.ReadLine();
+
+                try
                 {
-                    Console.WriteLine("\nSelect an option:");
-                    Console.WriteLine("1. View all products");
-                    Console.WriteLine("2. Search product by name");
-                    Console.WriteLine("3. Create a new order");
-                    Console.WriteLine("4. View order details");
-                    Console.WriteLine("5. Modify order status");
-                    Console.WriteLine("6. Add product to order");
-                    Console.WriteLine("7. Remove product from order");
-                    Console.WriteLine("8. Exit");
-
-                    string choice = Console.ReadLine();
-
-                    switch (choice)
-                    {
-                        case "1":
-                            ViewAllProducts(productCatalog);
-                            break;
-
-                        case "2":
-                            SearchProductByName(productCatalog);
-                            break;
-
-                        case "3":
-                            CreateOrder(orderService);
-                            break;
-
-                        case "4":
-                            ViewOrderDetails(orderService);
-                            break;
-
-                        case "5":
-                            ModifyOrderStatus(orderService);
-                            break;
-
-                        case "6":
-                            AddProductToOrder(productCatalog, orderService, orderDetails);
-                            break;
-
-                        case "7":
-                            RemoveProductFromOrder(orderDetails);
-                            break;
-
-                        case "8":
-                            isRunning = false;
-                            Console.WriteLine("Exiting application. Thank you for using TechShop!");
-                            break;
-
-                        default:
-                            Console.WriteLine("Invalid option. Please try again.");
-                            break;
-                    }
+                    if (techShopService.AddCustomer(newCustomer))
+                        Console.WriteLine("Customer added successfully.");
+                    else
+                        Console.WriteLine("Failed to add customer.");
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"An error occurred: {ex.Message}");
-            }
-        }
-
-        // View all products
-        static void ViewAllProducts(List<Product> products)
-        {
-            Console.WriteLine("\nProduct Catalog:");
-            foreach (var product in products)
-            {
-                Console.WriteLine($"ID: {product.ProductId}, Name: {product.Name}, Price: {product.Price}");
-            }
-        }
-
-        // Search product by name
-        static void SearchProductByName(List<Product> products)
-        {
-            Console.WriteLine("Enter the product name to search:");
-            string productName = Console.ReadLine();
-            var foundProducts = products.FindAll(p => p.Name.ToLower().Contains(productName.ToLower()));
-
-            if (foundProducts.Count > 0)
-            {
-                Console.WriteLine("Found the following products:");
-                foreach (var product in foundProducts)
+                catch (InvalidDataException ex)
                 {
-                    Console.WriteLine($"ID: {product.ProductId}, Name: {product.Name}, Price: {product.Price}");
+                    Console.WriteLine($"Error: {ex.Message}");
                 }
-            }
-            else
-            {
-                Console.WriteLine("No products found matching the given name.");
-            }
-        }
+                break;
 
-        // Create a new order
-        static void CreateOrder(OrderService orderService)
-        {
-            Order order = new Order();
-            Console.WriteLine("Enter Order ID:");
-            string orderIdInput = Console.ReadLine();
-            if (int.TryParse(orderIdInput, out int orderId))
-            {
-                order.OrderId = orderId;
-            }
-            else
-            {
-                Console.WriteLine("Invalid Order ID input. Please enter a valid number.");
-                return;
-            }
+            case "2":
+                Console.Write("Enter Customer ID to update: ");
+                int updateCustomerID = int.Parse(Console.ReadLine());
 
-            Console.WriteLine("Enter Order Status (e.g., Pending, Completed):");
-            string status = Console.ReadLine();
-            order.Status = status ?? "Pending";  
-
-            Console.WriteLine($"Order {order.OrderId} created with status: {order.Status}");
-            orderService.CreateOrder(order);
-        }
-
-        // View the details of an order
-        static void ViewOrderDetails(OrderService orderService)
-        {
-            Console.WriteLine("Enter Order ID to view details:");
-            string orderIdInput = Console.ReadLine();
-            if (int.TryParse(orderIdInput, out int orderId))
-            {
-                var order = orderService.GetOrderById(orderId);
-                if (order != null)
+                try
                 {
-                    Console.WriteLine($"Order ID: {order.OrderId}, Status: {order.Status}");
-                    Console.WriteLine("Order Details:");
-                    foreach (var detail in order.OrderDetails)
+                    Customer existingCustomer = techShopService.GetCustomerById(updateCustomerID);
+
+                    Console.Write("New First Name (leave blank to keep current): ");
+                    string newFirstName = Console.ReadLine();
+                    if (!string.IsNullOrWhiteSpace(newFirstName)) existingCustomer.FirstName = newFirstName;
+
+                    Console.Write("New Last Name (leave blank to keep current): ");
+                    string newLastName = Console.ReadLine();
+                    if (!string.IsNullOrWhiteSpace(newLastName)) existingCustomer.LastName = newLastName;
+
+                    Console.Write("New Email (leave blank to keep current): ");
+                    string newEmail = Console.ReadLine();
+                    if (!string.IsNullOrWhiteSpace(newEmail)) existingCustomer.Email = newEmail;
+
+                    if (techShopService.UpdateCustomer(existingCustomer))
+                        Console.WriteLine("Customer updated successfully.");
+                    else
+                        Console.WriteLine("Failed to update customer.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error: {ex.Message}");
+                }
+                break;
+
+            case "3":
+                Console.Write("Enter Customer ID to remove: ");
+                int removeCustomerID = int.Parse(Console.ReadLine());
+
+                try
+                {
+                    if (techShopService.RemoveCustomer(removeCustomerID))
+                        Console.WriteLine("Customer removed successfully.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error: {ex.Message}");
+                }
+                break;
+
+            case "4":
+                Console.Write("Enter Customer ID: ");
+                int viewCustomerID = int.Parse(Console.ReadLine());
+
+                try
+                {
+                    Customer customer = techShopService.GetCustomerById(viewCustomerID);
+                    Console.WriteLine($"First Name: {customer.FirstName}");
+                    Console.WriteLine($"Last Name: {customer.LastName}");
+                    Console.WriteLine($"Email: {customer.Email}");
+                    Console.WriteLine($"Phone: {customer.Phone}");
+                    Console.WriteLine($"Address: {customer.Address}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error: {ex.Message}");
+                }
+                break;
+
+            case "5":
+                Console.Write("Enter keyword to search: ");
+                string keyword = Console.ReadLine();
+
+                var customers = techShopService.SearchCustomers(keyword);
+                if (customers.Count > 0)
+                {
+                    Console.WriteLine("Search Results:");
+                    foreach (var customer in customers)
                     {
-                        Console.WriteLine($"Product ID: {detail.ProductId}, Quantity: {detail.Quantity}, Price: {detail.Price}");
+                        Console.WriteLine($"ID: {customer.CustomerID}, Name: {customer.FirstName} {customer.LastName}");
                     }
-                    Console.WriteLine($"Total Order Price: {order.TotalPrice}");
                 }
                 else
                 {
-                    Console.WriteLine("Order not found.");
+                    Console.WriteLine("No customers found.");
                 }
-            }
-            else
-            {
-                Console.WriteLine("Invalid Order ID input.");
-            }
-        }
+                break;
 
-        // Modify order status
-        static void ModifyOrderStatus(OrderService orderService)
-        {
-            Console.WriteLine("Enter Order ID to modify:");
-            string orderIdInput = Console.ReadLine();
-            if (int.TryParse(orderIdInput, out int orderId))
-            {
-                var order = orderService.GetOrderById(orderId);
-                if (order != null)
+            // Product Management
+            case "6":
+                Console.WriteLine("Enter Product Details:");
+                Product newProduct = new Product();
+
+                Console.Write("Product Name: ");
+                newProduct.ProductName = Console.ReadLine();
+
+                Console.Write("Description: ");
+                newProduct.Description = Console.ReadLine();
+
+                Console.Write("Price: ");
+                newProduct.Price = decimal.Parse(Console.ReadLine());
+
+                try
                 {
-                    Console.WriteLine("Enter new status for the order (e.g., Pending, Completed):");
-                    string newStatus = Console.ReadLine();
-                    order.Status = newStatus ?? order.Status;
-                    orderService.UpdateOrderStatus(order);
-                    Console.WriteLine($"Order {order.OrderId} status updated to {order.Status}.");
+                    if (techShopService.AddProduct(newProduct))
+                        Console.WriteLine("Product added successfully.");
+                    else
+                        Console.WriteLine("Failed to add product.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error: {ex.Message}");
+                }
+                break;
+
+            case "7":
+                Console.Write("Enter Product ID to update: ");
+                int updateProductID = int.Parse(Console.ReadLine());
+
+                try
+                {
+                    Product existingProduct = techShopService.GetProductById(updateProductID);
+
+                    Console.Write("New Product Name (leave blank to keep current): ");
+                    string newProductName = Console.ReadLine();
+                    if (!string.IsNullOrWhiteSpace(newProductName)) existingProduct.ProductName = newProductName;
+
+                    Console.Write("New Description (leave blank to keep current): ");
+                    string newDescription = Console.ReadLine();
+                    if (!string.IsNullOrWhiteSpace(newDescription)) existingProduct.Description = newDescription;
+
+                    Console.Write("New Price (leave blank to keep current): ");
+                    string newPriceStr = Console.ReadLine();
+                    if (!string.IsNullOrWhiteSpace(newPriceStr)) existingProduct.Price = decimal.Parse(newPriceStr);
+
+                    if (techShopService.UpdateProduct(existingProduct))
+                        Console.WriteLine("Product updated successfully.");
+                    else
+                        Console.WriteLine("Failed to update product.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error: {ex.Message}");
+                }
+                break;
+
+            case "8":
+                Console.Write("Enter Product ID to remove: ");
+                int removeProductID = int.Parse(Console.ReadLine());
+
+                try
+                {
+                    if (techShopService.RemoveProduct(removeProductID))
+                        Console.WriteLine("Product removed successfully.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error: {ex.Message}");
+                }
+                break;
+
+            case "9":
+                Console.Write("Enter Product ID: ");
+                int viewProductID = int.Parse(Console.ReadLine());
+
+                try
+                {
+                    Product product = techShopService.GetProductById(viewProductID);
+                    Console.WriteLine($"Product Name: {product.ProductName}");
+                    Console.WriteLine($"Description: {product.Description}");
+                    Console.WriteLine($"Price: {product.Price:C}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error: {ex.Message}");
+                }
+                break;
+
+            case "10":
+                Console.Write("Enter keyword to search: ");
+                string productKeyword = Console.ReadLine();
+
+                var products = techShopService.SearchProducts(productKeyword);
+                if (products.Count > 0)
+                {
+                    Console.WriteLine("Search Results:");
+                    foreach (var product in products)
+                    {
+                        Console.WriteLine($"ID: {product.ProductID}, Name: {product.ProductName}, Price: {product.Price:C}");
+                    }
                 }
                 else
                 {
-                    Console.WriteLine("Order not found.");
+                    Console.WriteLine("No products found.");
                 }
-            }
-            else
-            {
-                Console.WriteLine("Invalid Order ID input.");
-            }
-        }
+                break;
 
-        // Add a product to an order
-        static void AddProductToOrder(List<Product> products, OrderService orderService, Dictionary<int, OrderDetail> orderDetails)
-        {
-            Console.WriteLine("Enter Order ID to add product:");
-            string orderIdInput = Console.ReadLine();
-            if (int.TryParse(orderIdInput, out int orderId))
-            {
-                Console.WriteLine("Available Products:");
-                foreach (var product in products)
+            // Order Management
+            case "11":
+                Console.WriteLine("Enter Order Details:");
+                Order newOrder = new Order();
+
+                Console.Write("Customer ID: ");
+                newOrder.Customer = techShopService.GetCustomerById(int.Parse(Console.ReadLine()));
+
+                Console.Write("Order Date (YYYY-MM-DD): ");
+                newOrder.OrderDate = DateTime.Parse(Console.ReadLine());
+
+                newOrder.TotalAmount = 0;  // Assuming this will be calculated based on order details later.
+
+                if (techShopService.AddOrder(newOrder))
+                    Console.WriteLine("Order created successfully.");
+                else
+                    Console.WriteLine("Failed to create order.");
+                break;
+
+            // View Order by ID - Case 12
+            case "12":
+                Console.Write("Enter Order ID: ");
+                int viewOrderID = int.Parse(Console.ReadLine());
+
+                try
                 {
-                    Console.WriteLine($"ID: {product.ProductId}, Name: {product.Name}, Price: {product.Price}");
+                    Order order = techShopService.GetOrderById(viewOrderID);
+                    Console.WriteLine($"Order ID: {order.OrderID}");
+                    Console.WriteLine($"Customer: {order.Customer.FirstName} {order.Customer.LastName}");
+                    Console.WriteLine($"Order Date: {order.OrderDate}");
+                    Console.WriteLine($"Total Amount: {order.TotalAmount:C}");
                 }
-
-                Console.WriteLine("Enter Product ID to add to order:");
-                string productIdInput = Console.ReadLine();
-                if (int.TryParse(productIdInput, out int productId))
+                catch (Exception ex)
                 {
-                    Console.WriteLine("Enter Quantity:");
-                    string quantityInput = Console.ReadLine();
-                    if (int.TryParse(quantityInput, out int quantity))
+                    Console.WriteLine($"Error: {ex.Message}");
+                }
+                break;
+
+            // List Orders by Customer - Case 13
+            case "13":
+                Console.Write("Enter Customer ID to list orders: ");
+                int customerIDForOrders = int.Parse(Console.ReadLine());
+
+                try
+                {
+                    var orders = techShopService.GetOrdersByCustomerId(customerIDForOrders);
+                    if (orders.Count > 0)
                     {
-                        var product = products.Find(p => p.ProductId == productId);
-                        if (product != null)
+                        Console.WriteLine("Orders:");
+                        foreach (var order in orders)
                         {
-                            OrderDetail orderDetail = new OrderDetail
-                            {
-                                ProductId = productId,
-                                Quantity = quantity,
-                                Price = product.Price
-                            };
-                            orderDetails[productId] = orderDetail;
-                            Console.WriteLine($"Product {product.Name} added to order {orderId}.");
-                        }
-                        else
-                        {
-                            Console.WriteLine("Product not found.");
+                            Console.WriteLine($"Order ID: {order.OrderID}, Date: {order.OrderDate}, Total: {order.TotalAmount:C}");
                         }
                     }
                     else
                     {
-                        Console.WriteLine("Invalid quantity.");
+                        Console.WriteLine("No orders found for this customer.");
                     }
                 }
-                else
+                catch (Exception ex)
                 {
-                    Console.WriteLine("Invalid Product ID.");
+                    Console.WriteLine($"Error: {ex.Message}");
                 }
-            }
-            else
-            {
-                Console.WriteLine("Invalid Order ID.");
-            }
-        }
+                break;
 
-        // Remove product from an order
-        static void RemoveProductFromOrder(Dictionary<int, OrderDetail> orderDetails)
-        {
-            Console.WriteLine("Enter Order ID to remove product:");
-            string orderIdInput = Console.ReadLine();
-            if (int.TryParse(orderIdInput, out int orderId))
-            {
-                Console.WriteLine("Enter Product ID to remove from order:");
-                string productIdInput = Console.ReadLine();
-                if (int.TryParse(productIdInput, out int productId))
+            // List All Inventory - Case 14
+            case "14":
+                var inventoryItems = techShopService.ListAllInventoryItems();
+                Console.WriteLine("Inventory List:");
+                foreach (var inventory in inventoryItems)
                 {
-                    if (orderDetails.ContainsKey(productId))
+                    Console.WriteLine($"Product ID: {inventory.Product.ProductID}, Product Name: {inventory.Product.ProductName}, Quantity: {inventory.QuantityInStock}");
+                }
+                break;
+
+            // List Low Stock Products - Case 15
+            case "15":
+                Console.Write("Enter stock threshold: ");
+                int threshold = int.Parse(Console.ReadLine());
+
+                var lowStockProducts = techShopService.ListLowStockProducts(threshold);
+                if (lowStockProducts.Count > 0)
+                {
+                    Console.WriteLine("Low Stock Products:");
+                    foreach (var item in lowStockProducts)
                     {
-                        orderDetails.Remove(productId);
-                        Console.WriteLine($"Product {productId} removed from order {orderId}.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Product not found in order.");
+                        Console.WriteLine($"Product: {item.Product.ProductName}, Quantity: {item.QuantityInStock}");
                     }
                 }
                 else
                 {
-                    Console.WriteLine("Invalid Product ID.");
+                    Console.WriteLine("No products below the threshold.");
                 }
-            }
-            else
-            {
-                Console.WriteLine("Invalid Order ID.");
-            }
+                break;
+
+            // Exit
+            case "16":
+                continueRunning = false;
+                Console.WriteLine("Exiting the system.");
+                break;
+
+            default:
+                Console.WriteLine("Invalid choice. Please try again.");
+                break;
         }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"An unexpected error occurred: {ex.Message}");
     }
 }

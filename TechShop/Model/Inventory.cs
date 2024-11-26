@@ -2,20 +2,20 @@
 
 namespace TechShop.Model
 {
-    public class Inventory
+    internal class Inventory
     {
-        private int _inventoryId;
-        private Products? _product; 
+        private int _inventoryID;
+        private Product _product; 
         private int _quantityInStock;
         private DateTime _lastStockUpdate;
 
         public int InventoryID
         {
-            get { return _inventoryId; }
-            set { _inventoryId = value; }
+            get { return _inventoryID; }
+            set { _inventoryID = value; }
         }
 
-        public Products? Product
+        public Product Product
         {
             get { return _product; }
             set { _product = value; }
@@ -24,7 +24,13 @@ namespace TechShop.Model
         public int QuantityInStock
         {
             get { return _quantityInStock; }
-            set { _quantityInStock = value; }
+            set
+            {
+                if (value >= 0)
+                    _quantityInStock = value;
+                else
+                    throw new ArgumentException("Stock quantity cannot be negative.");
+            }
         }
 
         public DateTime LastStockUpdate
@@ -33,23 +39,98 @@ namespace TechShop.Model
             set { _lastStockUpdate = value; }
         }
 
-        public int ProductID { get; internal set; }
-
-        public Inventory() { }
-        public Inventory(int inventoryId, Products? product, int quantityInStock, DateTime lastStockUpdate)
+        public Product GetProduct()
         {
-            _inventoryId = inventoryId;
-            _product = product;
-            _quantityInStock = quantityInStock;
-            _lastStockUpdate = lastStockUpdate;
+            return Product; 
+        }
+
+        public int GetQuantityInStock()
+        {
+            return QuantityInStock;
+        }
+        public void AddToInventory(int quantity)
+        {
+            if (quantity <= 0)
+                throw new ArgumentException("Quantity to add must be greater than zero.");
+
+            QuantityInStock += quantity;
+            LastStockUpdate = DateTime.Now;
+
+            Console.WriteLine($"{quantity} units added to inventory. Total stock for {Product.ProductName}: {QuantityInStock}");
+        }
+
+        public void RemoveFromInventory(int quantity)
+        {
+            if (quantity <= 0)
+                throw new ArgumentException("Quantity to remove must be greater than zero.");
+
+            if (quantity > QuantityInStock)
+                throw new InvalidOperationException($"Insufficient stock. Only {QuantityInStock} units available.");
+
+            QuantityInStock -= quantity;
+            LastStockUpdate = DateTime.Now;
+
+            Console.WriteLine($"{quantity} units removed from inventory. Remaining stock for {Product.ProductName}: {QuantityInStock}");
+        }
+
+        public void UpdateStockQuantity(int newQuantity)
+        {
+            if (newQuantity < 0)
+                throw new ArgumentException("New stock quantity cannot be negative.");
+
+            QuantityInStock = newQuantity;
+            LastStockUpdate = DateTime.Now;
+
+            Console.WriteLine($"Stock updated. New quantity for {Product.ProductName}: {QuantityInStock}");
+        }
+
+        public bool IsProductAvailable(int quantityToCheck)
+        {
+            return QuantityInStock >= quantityToCheck;
+        }
+
+        public decimal GetInventoryValue()
+        {
+            return Product.Price * QuantityInStock;
+        }
+
+        public bool IsLowStock(int threshold)
+        {
+            return QuantityInStock < threshold;
+        }
+
+        public void ListLowStockProducts(int threshold)
+        {
+            if (IsLowStock(threshold))
+            {
+                Console.WriteLine($"Low stock alert for {Product.ProductName}: {QuantityInStock} units (threshold: {threshold}).");
+            }
+        }
+
+        public bool IsOutOfStock()
+        {
+            return QuantityInStock == 0;
+        }
+
+        public void ListOutOfStockProducts()
+        {
+            if (IsOutOfStock())
+            {
+                Console.WriteLine($"Out of stock: {Product.ProductName}");
+            }
+        }
+
+        public void ListAllProducts()
+        {
+            Console.WriteLine($"Inventory ID: {InventoryID}\n" +
+                              $"Product: {Product.ProductName}\n" +
+                              $"Quantity in Stock: {QuantityInStock}\n" +
+                              $"Last Stock Update: {LastStockUpdate}\n");
         }
 
         public override string ToString()
         {
-            return $"Inventory ID: {InventoryID}, " +
-                   $"Product: {Product?.ProductName}, " +
-                   $"Quantity In Stock: {QuantityInStock}, " +
-                   $"Last Stock Update: {LastStockUpdate.ToShortDateString()}";
+            return $"Inventory ID: {InventoryID}, Product: {Product.ProductName}, Stock: {QuantityInStock}, Last Updated: {LastStockUpdate}";
         }
     }
 }
